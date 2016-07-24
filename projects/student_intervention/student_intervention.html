@@ -11802,7 +11802,7 @@ While regression could sureley help in getting more insight into other aspects o
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Import libraries</span>
@@ -11854,14 +11854,14 @@ While regression could sureley help in getting more insight into other aspects o
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># TODO: Calculate number of students</span>
 <span class="n">n_students</span> <span class="o">=</span> <span class="n">student_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
 <span class="c1"># TODO: Calculate number of features</span>
-<span class="n">n_features</span> <span class="o">=</span> <span class="n">student_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">n_features</span> <span class="o">=</span> <span class="n">student_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span>
 
 <span class="c1"># TODO: Calculate passing students</span>
 <span class="n">n_passed</span> <span class="o">=</span> <span class="n">student_data</span><span class="p">[</span><span class="n">student_data</span><span class="o">.</span><span class="n">passed</span><span class="o">==</span><span class="s2">&quot;yes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -11870,7 +11870,7 @@ While regression could sureley help in getting more insight into other aspects o
 <span class="n">n_failed</span> <span class="o">=</span> <span class="n">student_data</span><span class="p">[</span><span class="n">student_data</span><span class="o">.</span><span class="n">passed</span><span class="o">==</span><span class="s2">&quot;no&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
 <span class="c1"># TODO: Calculate graduation rate</span>
-<span class="n">grad_rate</span> <span class="o">=</span> <span class="n">n_passed</span><span class="o">/</span><span class="n">n_students</span><span class="o">*</span><span class="mi">100</span>
+<span class="n">grad_rate</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">n_passed</span><span class="p">)</span><span class="o">/</span><span class="n">n_students</span><span class="o">*</span><span class="mi">100</span>
 
 <span class="c1"># Print the results</span>
 <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;Total number of students: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n_students</span><span class="p">))</span>
@@ -11891,7 +11891,7 @@ While regression could sureley help in getting more insight into other aspects o
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>Total number of students: 395
-Number of features: 31
+Number of features: 30
 Number of students who passed: 265
 Number of students who failed: 130
 Graduation rate of the class: 67.09%
@@ -11917,7 +11917,7 @@ Graduation rate of the class: 67.09%
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Extract feature columns</span>
@@ -11999,7 +11999,7 @@ Feature values:
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">preprocess_features</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
@@ -12070,7 +12070,7 @@ Feature values:
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># TODO: Import any additional functionality you may need here</span>
@@ -12162,7 +12162,7 @@ The <strong>naive bayes</strong> approach models the conditional dependency of a
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">train_classifier</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">):</span>
@@ -12235,7 +12235,7 @@ The <strong>naive bayes</strong> approach models the conditional dependency of a
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># TODO: Import the three supervised learning models from sklearn</span>
@@ -12248,26 +12248,10 @@ The <strong>naive bayes</strong> approach models the conditional dependency of a
 <span class="n">clf_B</span> <span class="o">=</span> <span class="n">svm</span><span class="o">.</span><span class="n">SVC</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
 <span class="n">clf_C</span> <span class="o">=</span> <span class="n">GaussianNB</span><span class="p">()</span>
 
-<span class="c1"># TODO: Set up the training set sizes</span>
-<span class="n">X_train_100</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">100</span><span class="p">]</span>
-<span class="n">y_train_100</span> <span class="o">=</span> <span class="n">y_train</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">100</span><span class="p">]</span>
-
-<span class="n">X_train_200</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">200</span><span class="p">]</span>
-<span class="n">y_train_200</span> <span class="o">=</span> <span class="n">y_train</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">200</span><span class="p">]</span>
-
-<span class="n">X_train_300</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">300</span><span class="p">]</span>
-<span class="n">y_train_300</span> <span class="o">=</span> <span class="n">y_train</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">300</span><span class="p">]</span>
-
 <span class="c1"># TODO: Execute the &#39;train_predict&#39; function for each classifier and each training set size</span>
-<span class="n">train_predict</span><span class="p">(</span><span class="n">clf_A</span><span class="p">,</span> <span class="n">X_train_100</span><span class="p">,</span> <span class="n">y_train_100</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
-<span class="n">train_predict</span><span class="p">(</span><span class="n">clf_A</span><span class="p">,</span> <span class="n">X_train_200</span><span class="p">,</span> <span class="n">y_train_200</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
-<span class="n">train_predict</span><span class="p">(</span><span class="n">clf_A</span><span class="p">,</span> <span class="n">X_train_300</span><span class="p">,</span> <span class="n">y_train_300</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
-<span class="n">train_predict</span><span class="p">(</span><span class="n">clf_B</span><span class="p">,</span> <span class="n">X_train_100</span><span class="p">,</span> <span class="n">y_train_100</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
-<span class="n">train_predict</span><span class="p">(</span><span class="n">clf_B</span><span class="p">,</span> <span class="n">X_train_200</span><span class="p">,</span> <span class="n">y_train_200</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
-<span class="n">train_predict</span><span class="p">(</span><span class="n">clf_B</span><span class="p">,</span> <span class="n">X_train_300</span><span class="p">,</span> <span class="n">y_train_300</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
-<span class="n">train_predict</span><span class="p">(</span><span class="n">clf_C</span><span class="p">,</span> <span class="n">X_train_100</span><span class="p">,</span> <span class="n">y_train_100</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
-<span class="n">train_predict</span><span class="p">(</span><span class="n">clf_C</span><span class="p">,</span> <span class="n">X_train_200</span><span class="p">,</span> <span class="n">y_train_200</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
-<span class="n">train_predict</span><span class="p">(</span><span class="n">clf_C</span><span class="p">,</span> <span class="n">X_train_300</span><span class="p">,</span> <span class="n">y_train_300</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">clf</span> <span class="ow">in</span> <span class="p">[</span><span class="n">clf_A</span><span class="p">,</span> <span class="n">clf_B</span><span class="p">,</span> <span class="n">clf_C</span><span class="p">]:</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">300</span><span class="p">]:</span>
+        <span class="n">train_predict</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">X_train</span><span class="p">[:</span><span class="n">n</span><span class="p">],</span> <span class="n">y_train</span><span class="p">[:</span><span class="n">n</span><span class="p">],</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12281,56 +12265,56 @@ The <strong>naive bayes</strong> approach models the conditional dependency of a
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>Training a RandomForestClassifier using a training set size of 100. . .
-Trained model in 0.0206 seconds
-Made predictions in 0.0000 seconds.
+Trained model in 0.0095 seconds
+Made predictions in 0.0010 seconds.
 F1 score for training set: 0.9867.
-Made predictions in 0.0000 seconds.
+Made predictions in 0.0010 seconds.
 F1 score for test set: 0.7164.
 Training a RandomForestClassifier using a training set size of 200. . .
-Trained model in 0.0240 seconds
-Made predictions in 0.0000 seconds.
+Trained model in 0.0105 seconds
+Made predictions in 0.0010 seconds.
 F1 score for training set: 0.9890.
-Made predictions in 0.0000 seconds.
+Made predictions in 0.0010 seconds.
 F1 score for test set: 0.7424.
 Training a RandomForestClassifier using a training set size of 300. . .
-Trained model in 0.0386 seconds
-Made predictions in 0.0000 seconds.
+Trained model in 0.0111 seconds
+Made predictions in 0.0015 seconds.
 F1 score for training set: 0.9902.
-Made predictions in 0.0100 seconds.
+Made predictions in 0.0010 seconds.
 F1 score for test set: 0.7939.
 Training a SVC using a training set size of 100. . .
-Trained model in 0.0000 seconds
-Made predictions in 0.0000 seconds.
+Trained model in 0.0018 seconds
+Made predictions in 0.0010 seconds.
 F1 score for training set: 0.8555.
-Made predictions in 0.0000 seconds.
+Made predictions in 0.0010 seconds.
 F1 score for test set: 0.7742.
 Training a SVC using a training set size of 200. . .
-Trained model in 0.0000 seconds
-Made predictions in 0.0000 seconds.
+Trained model in 0.0040 seconds
+Made predictions in 0.0030 seconds.
 F1 score for training set: 0.8318.
-Made predictions in 0.0100 seconds.
+Made predictions in 0.0015 seconds.
 F1 score for test set: 0.7843.
 Training a SVC using a training set size of 300. . .
-Trained model in 0.0000 seconds
-Made predictions in 0.0100 seconds.
+Trained model in 0.0070 seconds
+Made predictions in 0.0061 seconds.
 F1 score for training set: 0.8650.
-Made predictions in 0.0000 seconds.
+Made predictions in 0.0020 seconds.
 F1 score for test set: 0.8082.
 Training a GaussianNB using a training set size of 100. . .
-Trained model in 0.0000 seconds
-Made predictions in 0.0000 seconds.
+Trained model in 0.0005 seconds
+Made predictions in 0.0005 seconds.
 F1 score for training set: 0.2791.
 Made predictions in 0.0000 seconds.
 F1 score for test set: 0.2500.
 Training a GaussianNB using a training set size of 200. . .
-Trained model in 0.0000 seconds
+Trained model in 0.0005 seconds
 Made predictions in 0.0000 seconds.
 F1 score for training set: 0.8000.
-Made predictions in 0.0100 seconds.
+Made predictions in 0.0015 seconds.
 F1 score for test set: 0.7344.
 Training a GaussianNB using a training set size of 300. . .
-Trained model in 0.0000 seconds
-Made predictions in 0.0000 seconds.
+Trained model in 0.0005 seconds
+Made predictions in 0.0005 seconds.
 F1 score for training set: 0.8111.
 Made predictions in 0.0000 seconds.
 F1 score for test set: 0.7669.
@@ -12511,7 +12495,12 @@ Support vector machines are two-class classifiers, which find the maximum margin
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p><strong>Answer: </strong>
-Given two linearly separable classes, a support vector machine finds a seperator whith the maximum distance to both classes, i.e. the separator with the maximum margin. for a test point, the support vector machine just decides on which of the two sides of the separator the point lies and assigns a class label accordingly. If the data is not linearly separable, it can be transformed to a higher dimensional space where it is linearly separable and the algorithm works as described above.</p>
+Given two linearly separable classes, a support vector machine finds the maximum margin separator, as illustrated in the following picture.
+<img src="https://udacity-github-sync-content.s3.amazonaws.com/_imgs/372/1468928591/SVM_2.png" alt="alt text" title="Support vector machine - linear separability in 2D">
+For the two classes represented by the red and green dot, a support vector machine finds the linear separator (shown as dotted line) with the maximum distance to the points of each class, which are closest to the separator. These closest points "support" the margin (illustrated by the two bold lines parallel to the dotted line) and are therefore known as support vectors. For classification of unseen test instances, only these support vectors have to be kept from the original training dataset, which makes support vector machines highly memory efficient.</p>
+<p>In the case of class distributions which are not linearly seperable in the original data space, the so-called kernel trick can be used to transform the data into a higher dimensional space, in which a linear separator can be found. This principle is illustrated by the following two images.</p>
+<p><img src="https://udacity-github-sync-content.s3.amazonaws.com/_imgs/372/1468928598/data_2d_to_3d_hyperplane.png" alt="alt text" title="Support vector machine - kernel trick">
+The right pictures shows the scatterplot of a 2-class dataset, which is not linearly seperable in 2D. With an adequate kernel the data is transformed to 3D, where it is linearly seperable by a hyperplane, as shown in the left image.</p>
 
 </div>
 </div>
