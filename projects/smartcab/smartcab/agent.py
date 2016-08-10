@@ -36,9 +36,6 @@ class LearningAgent(Agent):
         actionsWithMaxQ = [action for action in actions if self.Q[state][action] == max(QValues)]
         action =  random.choice(actionsWithMaxQ)
         return action
-    def get_Q_value(self, state,action):
-        assert state in self.Q.keys(), "Unknown state!"
-        return self.Q[state][action]
     def reset_Q_table(self,states,actions):
         listOfPossibleStateValues = [states[stateCategory] for stateCategory in states.keys()]
         actionsDict=dict(zip(actions,[0]*len(actions)))
