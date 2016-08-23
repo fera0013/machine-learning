@@ -11,27 +11,20 @@ import math
 class LearningAgent(Agent):
     """An agent that learns to drive in the smartcab world."""
     def __init__(self, env):
-        super(LearningAgent, self).__init__(env)  # sets self.env = env, state = None, next_waypoint = None, and a default color
-        self.color = 'red'  # override color
-        self.planner = RoutePlanner(self.env, self)  # simple route planner to get next_waypoint
-        # TODO: Initialize any additional variables here
-        self.valid_actions = [None, 'forward', 'left', 'right']
-        self.valid_TraficLights = ['green','red'] 
+        super(LearningAgent, self).__init__(env)
+        self.color = 'red'  
+        self.planner = RoutePlanner(self.env, self)  
         self.Q={}
         self.alpha=0.8
         self.gamma=0.1
         self.epsilon=1
         self.previous_state=None
         self.previous_action=None
-        self.number_of_updates=0
-        #self.reset_Q_table(self.stateSpace,  self.valid_actions)
         self.number_of_successful_trials=0
         self.number_of_trials=0
-        self.success_rates = [] 
         self.successful_trials=[]
     def reset(self, destination=None):
         self.planner.route_to(destination)
-        #TODO: Prepare for a new trip; reset any variables here, if required
         self.previous_state=None
         self.previous_action=None
         self.epsilon = (float)(1)/(self.number_of_trials+1)
@@ -50,13 +43,18 @@ class LearningAgent(Agent):
         #This is not the savest way, since its impossible to validate new states completely
         #but it saves time and space
         if state_id not in self.Q.keys():
-            self.Q[state_id]=dict(zip(self.valid_actions,[0]*len(self.valid_actions)))
+            self.Q[state_id]=dict(zip(self.env.valid_actions,[0]*len(self.env.valid_actions)))
         return self.Q[state_id]
     def get_q_value(self,state_id,action):
         #use get_actions to initialize Q values if necessary
         return self.get_actions(state_id)[action]
     def set_q_value(self,state_id,action,q_value):
         self.Q[state_id][action]=q_value
+    def calculate_statistics(self):
+        if self.env.get_deadline(self)==0 or self.env.done:
+             if self.env.done:
+                 self.number_of_successful_trials+=1
+             self.successful_trials.append(self.number_of_successful_trials)  
     def update(self, t):
         self.next_waypoint = self.planner.next_waypoint()  
         inputs = self.env.sense(self)
@@ -71,13 +69,6 @@ class LearningAgent(Agent):
         self.previous_state = self.state
         print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
         self.calculate_statistics()
-    def calculate_statistics(self):
-        if self.env.get_deadline(self)==0 or self.env.done:
-             self.number_of_trials=self.number_of_trials+1
-             if self.env.done:
-                 self.number_of_successful_trials= self.number_of_successful_trials+1
-             self.success_rates.append((float)(self.number_of_successful_trials)/self.number_of_trials)  
-             self.successful_trials.append(self.number_of_successful_trials)  
 def display_evaluation_statistics(best_candidates):
     for candidate in best_candidates:
         plt.plot(candidate.successful_trials,label='alpha: '+str(candidate.alpha)+' gamma: '+str(candidate.gamma))
@@ -99,12 +90,22 @@ def run():
             a.alpha=alpha
             sim = Simulator(e, update_delay=0, display=False)  
             sim.run(n_trials=100) 
-            if len(best_candidates)<3:
+            if len(best_candidates)<5:
                 best_candidates.append(a)
             else:
-                min_candidate = min([(i,candidate.successful_trials[-1]) for i,candidate in enumerate(best_candidates)],key=lambda t:t[1])
+                min_candidate = min([(i,candidate.successful_trials[-1]) for i,candidate in enumerate(best_candidates)],
+                                    key=lambda t:t[1])
                 if a.successful_trials[-1]>min_candidate[1]:
                     best_candidates[min_candidate[0]]=a
+    for i,candidate in  enumerate(best_candidates):
+        e = Environment()  
+        a = e.create_agent(LearningAgent) 
+        e.set_primary_agent(a, enforce_deadline=True)  
+        a.gamma=candidate.gamma
+        a.alpha=candidate.alpha
+        sim = Simulator(e, update_delay=0, display=False)  
+        sim.run(n_trials=1000) 
+        best_candidates[i]=a
     display_evaluation_statistics(best_candidates)
 if __name__ == '__main__':
     run()
