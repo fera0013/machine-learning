@@ -6,6 +6,7 @@ import numpy as np
 import itertools
 import matplotlib.pyplot as plt
 import scipy.stats
+import math
 
 class LearningAgent(Agent):
     """An agent that learns to drive in the smartcab world."""
@@ -16,61 +17,58 @@ class LearningAgent(Agent):
         # TODO: Initialize any additional variables here
         self.valid_actions = [None, 'forward', 'left', 'right']
         self.valid_TraficLights = ['green','red'] 
-        self.stateSpace  = {'light': self.valid_TraficLights, 'oncoming': self.valid_actions, 'left': self.valid_actions, 'right': self.valid_actions,'dist' : range(15)}
         self.Q={}
         self.alpha=0.8
         self.gamma=0.1
-        self.epsilon=0.1
-        self.previousState=None
-        self.previousAction=None
+        self.epsilon=1
+        self.previous_state=None
+        self.previous_action=None
+        self.number_of_updates=0
         #self.reset_Q_table(self.stateSpace,  self.valid_actions)
         self.number_of_successful_trials=0
         self.number_of_trials=0
         self.success_rates = [] 
+        self.successful_trials=[]
     def reset(self, destination=None):
         self.planner.route_to(destination)
         #TODO: Prepare for a new trip; reset any variables here, if required
-        self.number_of_successful_trials=0
-        self.number_of_trials=0
-        self.previousState=None
-        self.previousAction=None
-    def choose_next_action(self, state):
+        self.previous_state=None
+        self.previous_action=None
+        self.epsilon = (float)(1)/(self.number_of_trials+1)
+    def choose_next_action(self, state_id):
         actions=[]
         #Simulated annealing: draw a random action with probability self.epsilon
         if scipy.stats.bernoulli.rvs(1-self.epsilon):
-            QValues=list(self.get_actions(state).values())
-            actions=list(self.get_actions(state).keys())
-            actions = [action for action in actions if self.Q[str(state)][action] == max(QValues)]
+            QValues=list(self.get_actions(state_id).values())
+            actions=list(self.get_actions(state_id).keys())
+            actions = [action for action in actions if self.Q[state_id][action] == max(QValues)]
         else:
-            actions= list(self.get_actions(state).keys())   
+            actions= list(self.get_actions(state_id).keys())   
         return random.choice(actions)
-    def get_actions(self,state):
+    def get_actions(self,state_id):
         #lazily expand Q-table once unknown states arrive. 
         #This is not the savest way, since its impossible to validate new states completely
         #but it saves time and space
-        assert len(state.keys())>0, "Invalid state!"  #There are more elegant ways to validate parameter types (e.g. decorators), I know ... 
-        stateID = str(state)
-        if stateID not in self.Q.keys():
-            self.Q[stateID]=dict(zip(self.valid_actions,[0]*len(self.valid_actions)))
-        return self.Q[stateID]
+        if state_id not in self.Q.keys():
+            self.Q[state_id]=dict(zip(self.valid_actions,[0]*len(self.valid_actions)))
+        return self.Q[state_id]
+    def get_q_value(self,state_id,action):
+        #use get_actions to initialize Q values if necessary
+        return self.get_actions(state_id)[action]
+    def set_q_value(self,state_id,action,q_value):
+        self.Q[state_id][action]=q_value
     def update(self, t):
-        # Gather inputs
-        self.next_waypoint = self.planner.next_waypoint()  # from route planner, also displayed by simulator
+        self.next_waypoint = self.planner.next_waypoint()  
         inputs = self.env.sense(self)
         deadline = self.env.get_deadline(self)
-        # TODO: Update state
-        self.state=inputs
-        self.state['dist']=self.env.compute_dist(self.env.agent_states[self]['location'], self.env.agent_states[self]['destination'])
-        currentStateID= str(self.state)
-        # TODO: Select action according to your policy
+        self.state=str(inputs)
         action = self.choose_next_action(self.state)
-        # Execute action and get reward
         reward = self.env.act(self, action)
-        # TODO: Learn policy based on state, action, reward
-        if self.previousAction is not None and self.previousState is not None:
-            self.Q[self.previousState][self.previousAction]=self.alpha*(reward+self.gamma*max([self.Q[currentStateID][action] for action in self.env.valid_actions])) 
-        self.previousAction = action
-        self.previousState =  currentStateID
+        if self.previous_action is not None and self.previous_state is not None:
+            new_q_value=self.alpha*(reward+self.gamma*max([self.get_q_value(self.state,act) for act in self.env.valid_actions])) 
+            self.set_q_value(self.previous_state, self.previous_action,new_q_value)
+        self.previous_action = action
+        self.previous_state = self.state
         print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
         self.calculate_statistics()
     def calculate_statistics(self):
@@ -79,31 +77,34 @@ class LearningAgent(Agent):
              if self.env.done:
                  self.number_of_successful_trials= self.number_of_successful_trials+1
              self.success_rates.append((float)(self.number_of_successful_trials)/self.number_of_trials)  
-def run():
-    """Run the agent for a finite number of trials."""
-
-    # Set up environment and agent
-    e = Environment()  # create environment (also adds some dummy traffic)
-    a = e.create_agent(LearningAgent)  # create agent
-    e.set_primary_agent(a, enforce_deadline=True)  # specify agent to track
-    # NOTE: You can set enforce_deadline=False while debugging to allow longer trials
-    #e.enforce_deadline=False
-    # Now simulate it
-    sim = Simulator(e, update_delay=0, display=False)  # create simulator (uses pygame when display=True, if available)
-    # NOTE: To speed up simulation, reduce update_delay and/or set display=False
-    trial_success_rates=[]
-    for alpha in np.arange(0,1,0.2):
-        for gamma in np.arange(0,1,0.2):
-            a.gamma=gamma
-            a.alpha=alpha
-            a.success_rates = []
-            sim.run(n_trials=2)  # run for a specified number of trials
-            # NOTE: To quit midway, press Esc or close pygame window, or hit Ctrl+C on the command-line
-            plt.plot(a.success_rates,label='alpha: '+str(alpha)+' gamma: '+str(gamma))
-    plt.xlabel('number_of_trials')
-    plt.ylabel('success_rate')
+             self.successful_trials.append(self.number_of_successful_trials)  
+def display_evaluation_statistics(best_candidates):
+    for candidate in best_candidates:
+        plt.plot(candidate.successful_trials,label='alpha: '+str(candidate.alpha)+' gamma: '+str(candidate.gamma))
+    plt.xlabel('trial')
+    plt.ylabel('succesful trials')
     plt.title=('Test')
     plt.legend(loc = 'best').draggable()
     plt.show()
+def run():
+    """Run the agent for a finite number of trials."""
+    evaluation_statistics={}
+    best_candidates=[]
+    for alpha in np.arange(0.1,1,0.1):
+        for gamma in np.arange(0.1,1,0.1):
+            e = Environment()  
+            a = e.create_agent(LearningAgent) 
+            e.set_primary_agent(a, enforce_deadline=True)  
+            a.gamma=gamma
+            a.alpha=alpha
+            sim = Simulator(e, update_delay=0, display=False)  
+            sim.run(n_trials=100) 
+            if len(best_candidates)<3:
+                best_candidates.append(a)
+            else:
+                min_candidate = min([(i,candidate.successful_trials[-1]) for i,candidate in enumerate(best_candidates)],key=lambda t:t[1])
+                if a.successful_trials[-1]>min_candidate[1]:
+                    best_candidates[min_candidate[0]]=a
+    display_evaluation_statistics(best_candidates)
 if __name__ == '__main__':
     run()
