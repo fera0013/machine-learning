@@ -112,7 +112,11 @@ def get_constant_epsilon(self):
 def get_decaying_epsilon(self):
     return (float)(1)/(self.number_of_trials)
 def get_sense_state(self):
+<<<<<<< HEAD
     return str(self.env.sense(self))
+=======
+    return str((self.env.sense(self)))
+>>>>>>> 30a19be99a2ca3b3e810cc3abf49c6ee2256d1c7
 def get_state_including_next_waypoint(self):
     return str((self.env.sense(self),self.planner.next_waypoint()))
 
