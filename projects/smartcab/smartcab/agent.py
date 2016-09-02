@@ -73,7 +73,8 @@ class LearningAgent(Agent):
         reward = self.env.act(self, action)
         if reward<0: self.number_of_driving_errors+=1 
         if self.previous_action is not None:
-            new_q_value=self.alpha*(self.previous_reward+self.gamma*max([self.get_q_value(self.state,act) for act in self.env.valid_actions])) 
+            #The bellman equation
+            new_q_value=(1-self.alpha)*self.get_q_value(self.previous_state,self.previous_action)+self.alpha*(self.previous_reward+self.gamma*max([self.get_q_value(self.state,act) for act in self.env.valid_actions])) 
             self.set_q_value(self.previous_state, self.previous_action,new_q_value)
         self.previous_action = action
         self.previous_state = self.state
@@ -111,14 +112,12 @@ def get_constant_epsilon(self):
     return 1
 def get_decaying_epsilon(self):
     return (float)(1)/(self.number_of_trials)
-def get_sense_state(self):
-<<<<<<< HEAD
-    return str(self.env.sense(self))
-=======
+def get_basic_state(self):
     return str((self.env.sense(self)))
->>>>>>> 30a19be99a2ca3b3e810cc3abf49c6ee2256d1c7
 def get_state_including_next_waypoint(self):
     return str((self.env.sense(self),self.planner.next_waypoint()))
+def get_full_state(self):
+    return str((self.env.sense(self),self.planner.next_waypoint(),self.env.get_deadline(self)))
 
 
 def run_with_random_actions(n_trials):
@@ -129,27 +128,17 @@ def run_with_random_actions(n_trials):
     sim = Simulator(e, update_delay=0, display=False)  
     sim.run(n_trials=n_trials)  
     return a
-def run_with_sense_state(n_trials):
-    trials=100
+
+def run_with_state_implementation(n_trials,state_method,agent=None):
     e = Environment() 
-    a = e.create_agent(LearningAgent)
-    a.get_epsilon=types.MethodType(get_decaying_epsilon, a) 
-    a.get_state=types.MethodType(get_sense_state, a) 
-    e.set_primary_agent(a, enforce_deadline=True) 
+    if agent is None: agent = e.create_agent(LearningAgent)
+    agent.get_epsilon=types.MethodType(get_decaying_epsilon, agent) 
+    agent.get_state=types.MethodType(state_method, agent) 
+    e.set_primary_agent(agent, enforce_deadline=True) 
     sim = Simulator(e, update_delay=0, display=False)  
     sim.run(n_trials=n_trials)  
-    return a
-def run_with_state_including_next_waypoint(n_trials):
-    trials=100
-    e = Environment() 
-    a = e.create_agent(LearningAgent)
-    a.get_epsilon=types.MethodType(get_decaying_epsilon, a) 
-    a.get_state=types.MethodType(get_state_including_next_waypoint, a) 
-    e.set_primary_agent(a, enforce_deadline=True) 
-    sim = Simulator(e, update_delay=0, display=False)  
-    sim.run(n_trials=n_trials)  
-    return a
-def run_with_parameter_finetuning(n_trials):
+    return agent
+def parameter_grid_search(n_trials,state_method):
     agents=[]
     for alpha in np.arange(0.1,0.9,0.2):
         for gamma in np.arange(0.1,0.9,0.2):
@@ -174,14 +163,17 @@ def run():
     n_trials=100
     dumbcab= run_with_random_actions(n_trials)
     display_evaluation_statistics(dumbcab,"Random actions")
-    agent_with_sense_state = run_with_sense_state(n_trials)
+    agent_with_sense_state = run_with_state_implementation(n_trials,get_basic_state)
     display_evaluation_statistics([dumbcab,  agent_with_sense_state],"Q-learning with 'sense' state")
-    agent_with_state_including_next_waypoint = run_with_state_including_next_waypoint(n_trials)
+    agent_with_state_including_next_waypoint =  run_with_state_implementation(n_trials,get_state_including_next_waypoint)
     display_evaluation_statistics([dumbcab, agent_with_state_including_next_waypoint],"Q-learning with state including next waypoint")
-    finetuned_agents = run_with_parameter_finetuning(n_trials)
-    display_evaluation_statistics([dumbcab]+finetuned_agents,"Q-learning - parameter fine tuning")
-    max_success,min_driving_errors, best_agents = get_best_agents(finetuned_agents)
-    print "The maximum success rate of {} with the lowest driving errors of {} can be achieved with the following combinations of parameters:".format(max_success, min_driving_errors)
+    agent_with_full_state =  run_with_state_implementation(n_trials,get_full_state)
+    display_evaluation_statistics([dumbcab, agent_with_full_state],"Q-learning with state including next waypoint")
+    display_evaluation_statistics([agent_with_sense_state,agent_with_state_including_next_waypoint,agent_with_full_state],"Performance of different state implementations")
+    grid_search_agents = parameter_grid_search(n_trials,agent_with_state_including_next_waypoint)
+    display_evaluation_statistics([dumbcab]+grid_search_agents,"Q-learning - parameter grid search with waypoint state agents")
+    max_success,min_driving_errors, best_agents = get_best_agents(grid_search_agents)
+    print "The maximum success rate of {} with the fewest driving errors of {} can be achieved with the following combinations of parameters:".format(max_success, min_driving_errors)
     for agent in best_agents:
         print "alpha: {} - gamma: {}".format(agent.alpha,agent.gamma) 
 if __name__ == '__main__':
