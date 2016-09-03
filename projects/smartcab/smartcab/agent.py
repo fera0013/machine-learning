@@ -117,7 +117,7 @@ def get_traffic_and_waypoint_state(self):
 def get_full_state(self):
     return str((self.env.sense(self),self.planner.next_waypoint(),self.env.get_deadline(self)))
 
-#Generic method to train q-learning models that can be defined through the specification of the parameters
+#Generic method to train q-learning implementations that can be defined through the specification of the parameters
 def train_agent(n_trials,
                        state_method, 
                        epsilon_method,
@@ -129,6 +129,8 @@ def train_agent(n_trials,
                        update_delay=0):
     e = Environment() 
     if agent is None: agent = e.create_agent(LearningAgent)
+    agent.gamma=gamma
+    agent.alpha=alpha
     agent.get_epsilon=types.MethodType(epsilon_method, agent) 
     agent.get_state=types.MethodType(state_method, agent) 
     e.set_primary_agent(agent, enforce_deadline=True) 
