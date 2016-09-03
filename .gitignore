@@ -66,3 +66,6 @@ target/
 *.sln
 projects/smartcab/smartcab.pyproj
 *.suo
+*.tmp
+projects/smartcab/smartcab_report.odt
+*.odt
