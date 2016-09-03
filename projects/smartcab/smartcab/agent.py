@@ -44,7 +44,7 @@ class LearningAgent(Agent):
             actions=list(self.get_actions(state_id).keys())
             actions = [action for action in actions if self.Q[state_id][action] == max(q_values)]
         else:
-            actions= list(self.get_actions(state_id).keys())   
+            actions= self.env.valid_actions  
         return random.choice(actions)
     def get_actions(self,state_id):
         #lazily expand Q-table once unknown states arrive. 
@@ -57,10 +57,7 @@ class LearningAgent(Agent):
     def set_q_value(self,state_id,action,q_value):
         self.Q[state_id][action]=q_value
     def get_state(self):
-        can_reach_next_waypoint=False
-        if self.next_waypoint=='forward' or self.env.sense(self)[self.next_waypoint]==None:
-            can_reach_next_waypoint=True 
-        return str((self.env.sense(self)['light'],self.next_waypoint,can_reach_next_waypoint))
+        return str((self.env.sense(self)))
     def calculate_statistics(self):
         if self.env.get_deadline(self)>0 and self.env.done:
              self.number_of_successful_trials+=1
@@ -83,6 +80,7 @@ class LearningAgent(Agent):
         self.calculate_statistics()
 
 def display_evaluation_statistics(agents,figure_name='stats'):
+    plt.rcParams.update({'font.size': 22})
     if hasattr(agents, "__len__"):
         n_columns=3
         if len(agents) < 3: n_columns=len(agents)
@@ -112,45 +110,37 @@ def get_constant_epsilon(self):
     return 1
 def get_decaying_epsilon(self):
     return (float)(1)/(self.number_of_trials)
-def get_basic_state(self):
+def get_traffic_state(self):
     return str((self.env.sense(self)))
-def get_state_including_next_waypoint(self):
+def get_traffic_and_waypoint_state(self):
     return str((self.env.sense(self),self.planner.next_waypoint()))
 def get_full_state(self):
     return str((self.env.sense(self),self.planner.next_waypoint(),self.env.get_deadline(self)))
 
-
-def run_with_random_actions(n_trials):
-    e = Environment() 
-    a = e.create_agent(LearningAgent)
-    a.get_epsilon=types.MethodType(get_constant_epsilon, a) 
-    e.set_primary_agent(a, enforce_deadline=False) 
-    sim = Simulator(e, update_delay=0, display=False)  
-    sim.run(n_trials=n_trials)  
-    return a
-
-def run_with_state_implementation(n_trials,state_method,agent=None):
+#Generic method to train q-learning models that can be defined through the specification of the parameters
+def train_agent(n_trials,
+                       state_method, 
+                       epsilon_method,
+                       alpha=0.2,
+                       gamma=0.2,
+                       agent=None,
+                       enforce_deadline=True,
+                       display=False,
+                       update_delay=0):
     e = Environment() 
     if agent is None: agent = e.create_agent(LearningAgent)
-    agent.get_epsilon=types.MethodType(get_decaying_epsilon, agent) 
+    agent.get_epsilon=types.MethodType(epsilon_method, agent) 
     agent.get_state=types.MethodType(state_method, agent) 
     e.set_primary_agent(agent, enforce_deadline=True) 
     sim = Simulator(e, update_delay=0, display=False)  
     sim.run(n_trials=n_trials)  
     return agent
-def parameter_grid_search(n_trials,state_method):
+
+def parameter_grid_search(n_trials,state_method,epsilon_method):
     agents=[]
     for alpha in np.arange(0.1,0.9,0.2):
         for gamma in np.arange(0.1,0.9,0.2):
-            e = Environment()  
-            a = e.create_agent(LearningAgent) 
-            e.set_primary_agent(a, enforce_deadline=True)  
-            a.get_epsilon=types.MethodType(get_decaying_epsilon, a )
-            a.get_state=types.MethodType(get_state_including_next_waypoint, a) 
-            a.gamma=gamma
-            a.alpha=alpha
-            sim = Simulator(e, update_delay=0, display=False)  
-            sim.run(n_trials= n_trials) 
+            a=train_agent(n_trials=n_trials,state_method=state_method,epsilon_method=epsilon_method,alpha=alpha,gamma=gamma)
             agents.append(a)
     return agents
 
@@ -161,17 +151,17 @@ def get_best_agents(agents):
 
 def run():
     n_trials=100
-    dumbcab= run_with_random_actions(n_trials)
+    dumbcab= train_agent(n_trials=n_trials,state_method=get_traffic_state,epsilon_method=get_constant_epsilon,enforce_deadline=False)
     display_evaluation_statistics(dumbcab,"Random actions")
-    agent_with_sense_state = run_with_state_implementation(n_trials,get_basic_state)
-    display_evaluation_statistics([dumbcab,  agent_with_sense_state],"Q-learning with 'sense' state")
-    agent_with_state_including_next_waypoint =  run_with_state_implementation(n_trials,get_state_including_next_waypoint)
-    display_evaluation_statistics([dumbcab, agent_with_state_including_next_waypoint],"Q-learning with state including next waypoint")
-    agent_with_full_state =  run_with_state_implementation(n_trials,get_full_state)
-    display_evaluation_statistics([dumbcab, agent_with_full_state],"Q-learning with state including next waypoint")
-    display_evaluation_statistics([agent_with_sense_state,agent_with_state_including_next_waypoint,agent_with_full_state],"Performance of different state implementations")
-    grid_search_agents = parameter_grid_search(n_trials,agent_with_state_including_next_waypoint)
-    display_evaluation_statistics([dumbcab]+grid_search_agents,"Q-learning - parameter grid search with waypoint state agents")
+    agent_with_traffic_state = train_agent(n_trials=n_trials,state_method=get_traffic_state,epsilon_method=get_decaying_epsilon)
+    display_evaluation_statistics([dumbcab,agent_with_traffic_state],"Q-learning with traffic state")
+    agent_with_traffic_and_waypoint_state =  train_agent(n_trials=n_trials,state_method=get_traffic_and_waypoint_state,epsilon_method=get_decaying_epsilon)
+    display_evaluation_statistics([dumbcab,agent_with_traffic_and_waypoint_state],"Q-learning with traffic and waypoint state")
+    agent_with_full_state =  train_agent(n_trials=n_trials,state_method=get_full_state,epsilon_method=get_decaying_epsilon)
+    display_evaluation_statistics([dumbcab, agent_with_full_state],"Q-learning with full state")
+    display_evaluation_statistics([agent_with_traffic_state,agent_with_traffic_and_waypoint_state,agent_with_full_state],"Performance of different state implementations")
+    grid_search_agents = parameter_grid_search(n_trials=n_trials,state_method=get_traffic_and_waypoint_state,epsilon_method=get_decaying_epsilon)
+    display_evaluation_statistics([dumbcab]+grid_search_agents,"Q-learning - parameter grid search")
     max_success,min_driving_errors, best_agents = get_best_agents(grid_search_agents)
     print "The maximum success rate of {} with the fewest driving errors of {} can be achieved with the following combinations of parameters:".format(max_success, min_driving_errors)
     for agent in best_agents:
