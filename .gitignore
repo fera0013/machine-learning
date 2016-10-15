@@ -69,3 +69,4 @@ projects/smartcab/smartcab.pyproj
 *.tmp
 projects/smartcab/smartcab_report.odt
 *.odt
+*.vsdx
